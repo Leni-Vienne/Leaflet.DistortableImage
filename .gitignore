@@ -11,3 +11,4 @@ dist/*
 !dist/vendor.js
 !dist/vendor.css
 !dist/leaflet.distortableimage.js.map
+.idea
