@@ -68,11 +68,11 @@ L.EditHandle = L.Marker.extend({
   },
 
   /* Takes two latlngs and calculates the scaling difference. */
-  _calculateScalingFactor(latlngA, latlngB) {
+  _calculateScalingFactor(latlngA, latlngB, anchor = null) {
     const overlay = this._handled;
     const map = overlay._map;
 
-    const centerPoint = map.latLngToLayerPoint(overlay.getCenter());
+    const centerPoint = map.latLngToLayerPoint(anchor || overlay.getCenter());
     const formerPoint = map.latLngToLayerPoint(latlngA);
     const newPoint = map.latLngToLayerPoint(latlngB);
     const formerRadiusSquared = this._d2(centerPoint, formerPoint);
@@ -90,12 +90,12 @@ L.EditHandle = L.Marker.extend({
   },
 
   /* Takes two latlngs and calculates the angle between them. */
-  calculateAngleDelta(latlngA, latlngB) {
+  calculateAngleDelta(latlngA, latlngB, anchor = null) {
     const overlay = this._handled;
     const map = overlay._map;
 
 
-    const centerPoint = map.latLngToLayerPoint(overlay.getCenter());
+    const centerPoint = map.latLngToLayerPoint(anchor || overlay.getCenter());
     const formerPoint = map.latLngToLayerPoint(latlngA);
     const newPoint = map.latLngToLayerPoint(latlngB);
 
