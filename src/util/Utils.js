@@ -11,6 +11,7 @@ L.Utils = {
       addBorder: 'Add Border',
       freeRotateImage: 'Free rotate Image',
       resizeRotateImage: 'Resize rotate Image',
+      transformImage: 'Transform Image',
       geolocateImage: 'Geolocate Image',
       lockMode: 'Lock Mode',
       lockImages: 'Lock Images',

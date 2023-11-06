@@ -60,8 +60,8 @@ L.OpacitiesToolbar2 = L.Toolbar2.extend({
   },
 
   appendToContainer(container) {
-    let baseClass = this.constructor.baseClass + '-' + this._calculateDepth();
-    let className = baseClass + ' ' + this.options.className;
+    const baseClass = this.constructor.baseClass + '-' + this._calculateDepth();
+    const className = baseClass + ' ' + this.options.className;
     let Action; let action;
     let i; let j; let l; let m;
 

@@ -159,7 +159,8 @@ input.ldi {
 
 a.leaflet-toolbar-icon.rotate.selected-mode,
 a.leaflet-toolbar-icon.freeRotate.selected-mode,
-  a.leaflet-toolbar-icon.resizeRotate.selected-mode {
+a.leaflet-toolbar-icon.resizeRotate.selected-mode,
+a.leaflet-toolbar-icon.transform.selected-mode {
   background-color: rgba(251, 18, 14, 0.75);
   border: inset 0.5px lightgray;
 }
@@ -167,6 +168,7 @@ a.leaflet-toolbar-icon.freeRotate.selected-mode,
 a.leaflet-toolbar-icon.rotate.selected-mode .ldi-icon,
 a.leaflet-toolbar-icon.freeRotate.selected-mode .ldi-icon,
 a.leaflet-toolbar-icon.resizeRotate.selected-mode .ldi-icon,
+a.leaflet-toolbar-icon.transform.selected-mode .ldi-icon,
 a.leaflet-toolbar-icon.drag.selected-mode .ldi-icon {
   fill: white;
 }

@@ -142,6 +142,15 @@ L.DistortableImage.Edit = L.Handler.extend({
       this._resizeRotateHandles.addLayer(L.resizeRotateHandle(overlay, i));
     }
 
+    this._transformHandles = L.layerGroup();
+    for (i = 0; i < 4; i++) {
+      this._transformHandles.addLayer(L.transformResizeHandle(overlay, i));
+    }
+    for (i = -1; i >= -4; i--) {
+      this._transformHandles.addLayer(L.transformSquishHandle(overlay, i));
+    }
+    this._transformHandles.addLayer(L.transformRotateHandle(overlay, -5));
+
     this._lockHandles = L.layerGroup();
     for (i = 0; i < 4; i++) {
       this._lockHandles.addLayer(L.lockHandle(overlay, i, {draggable: false}));
@@ -154,6 +163,7 @@ L.DistortableImage.Edit = L.Handler.extend({
       rotate: this._rotateHandles,
       freeRotate: this._freeRotateHandles,
       resizeRotate: this._resizeRotateHandles,
+      transform: this._transformHandles,
       lock: this._lockHandles,
     };
   },
@@ -348,6 +358,10 @@ L.DistortableImage.Edit = L.Handler.extend({
 
   _resizeRotateMode() {
     this.setMode('resizeRotate');
+  },
+
+  _transformMode() {
+    this.setMode('transform');
   },
 
   _toggleLockMode() {

@@ -9,6 +9,7 @@ L.DistortableImageOverlay = L.ImageOverlay.extend({
     selected: false,
     interactive: true,
     tooltipText: '',
+    deselectOnOutsideClick: true,
   },
 
   initialize(url, options) {
@@ -138,7 +139,7 @@ L.DistortableImageOverlay = L.ImageOverlay.extend({
   },
 
   _singleClick(e) {
-    if (e.type === 'singleclick') { this.deselect(); }
+    if (e.type === 'singleclick' && this.options.deselectOnOutsideClick) { this.deselect(); }
     else { return; }
   },
 
@@ -515,7 +516,37 @@ L.DistortableImageOverlay = L.ImageOverlay.extend({
   },
 
   getCorner(i) {
-    return this._corners[i];
+    if (i >= 0) {
+      return this._corners[i];
+    } else if (i === -5) {
+      const map = this._map;
+      const pointA = map.project(this._corners[2]);
+      const pointB = map.project(this._corners[3]).subtract(pointA);
+      const half = Math.sqrt(Math.pow(pointB.x, 2) + Math.pow(pointB.y, 2)) / 2;
+      const deviation = 32;
+      const angle = Math.atan(deviation / half) + Math.atan2(pointB.y, pointB.x);
+      const length = Math.sqrt(Math.pow(half, 2) + Math.pow(deviation, 2));
+      const point = L.point(Math.cos(angle) * length, Math.sin(angle) * length).add(pointA);
+      return map.unproject(point);
+    } else {
+      const aCorner = Math.abs(i) % 4;
+      const bCorner = aCorner === 1 ? 0 : aCorner === 2 ? 3 : aCorner === 3 ? 1 : 2;
+      const lat = (this._corners[aCorner].lat + this._corners[bCorner].lat) / 2;
+      const lng = (this._corners[aCorner].lng + this._corners[bCorner].lng) / 2;
+      return L.latLng(lat, lng);
+    }
+  },
+
+  getOppositeCorner(i) {
+    return i === 0 ? this.getCorner(3) :
+      i === 1 ? this.getCorner(2) :
+      i === 2 ? this.getCorner(1) :
+      i === 3 ? this.getCorner(0) :
+      i === -1 ? this.getCorner(-2) :
+      i === -2 ? this.getCorner(-1) :
+      i === -3 ? this.getCorner(-4) :
+      i === -4 ? this.getCorner(-3) :
+      null;
   },
 
   // image (vertex) centroid calculation

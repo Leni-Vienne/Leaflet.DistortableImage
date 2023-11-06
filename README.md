@@ -168,6 +168,7 @@ Values available to pass to `mode` are:
 * **scale**: Resize only.
 * **freeRotate**: Combines the rotate and scale modes into one.
 * **resizeRotate**: Combines the rotate and resize modes into one.
+* **transform**: Resize, squish and rotate image.
 * **lock**: Locks the image in place. Disables any user gestures, toolbar actions, or hotkeys that are not associated with mode. Exception: `L.ExportAction` will still be enabled.
 
 In the below example, the image will be initialized with "freeRotate" handles:

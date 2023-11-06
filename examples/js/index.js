@@ -8,6 +8,7 @@ let map;
     img = L.distortableImageOverlay('example.jpg', {
       selected: true,
       fullResolutionSrc: 'large.jpg',
+      deselectOnOutsideClick: false,
     }).addTo(map);
   });
 })();

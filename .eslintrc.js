@@ -36,7 +36,7 @@ module.exports = {
     'curly': [2, 'multi-line'],
     'guard-for-in': 0,
     'linebreak-style': [2, 'unix'],
-    'max-len': ['warn', {ignoreComments: true, ignoreStrings: true, tabWidth: 2}],
+    'max-len': ['warn', {ignoreComments: true, ignoreStrings: true, tabWidth: 2, code: 120}],
     'new-cap': 0,
     'no-trailing-spaces': 2,
     'no-var': 0,

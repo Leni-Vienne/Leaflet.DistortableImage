@@ -1,10 +1,13 @@
-L.ResizeRotateHandle = L.EditHandle.extend({
+L.TransformResizeHandle = L.EditHandle.extend({
   options: {
-    TYPE: 'resizeRotate',
+    TYPE: 'transformResize',
     icon: L.icon({
       iconUrl:
         // eslint-disable-next-line max-len
-        'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAAAklEQVR4AewaftIAAAHiSURBVMXBa3HbShgA0PMp/1sCCo8oCEpgTaCXgIXAJiDzyCJoAUTm4UVQAns1Y8+snWnTvJyeE16hkjDgDrfoNTMKcpC9UPiLSo8JyetkjEHxjPCMyoS199kFoz8Iv1HpMaN3qWDCHoegOKkkRwnJpRmroHgiPFEZ8IBekzEGxQtUEhKSS/fB7Ew4U+lxcGkVZG9QWWPSFAxBcdK59KApuA+yNwp2uEdx1GN25sZJZULSfAtm77SlbNjju6MvG75u+WHRWVR6rDVjMPsgwYyVZl3pLTpHkyYHOx8syMiayaJzlDTZ9YyaZNFVkiYH2ZUEBcVJJXVImuz6Js3Qofe59pq7DoOTILu+g+a288mCouk7/1iH4qTS+2QdDppbV1ZJmrnDXnPnc5UOs2Z0fUmTuyBr+krvSioJyUmQO0dZM7mepMkWnaNRkyrJB6uskTSjxY3Fll8bvmJwlDb83FJ8gMqAB80uyBY3Trb82PAfvjj6vuHnluIdKgMeNXOwctK5NKBoHitrb1RJeHRp5Ux4ojLg0aWMHGQvUOkxIWkKVsHsTPiNSo8HDC5lZIsgO6n0uMUdRvQuFQxB8UR4RmXC2vvsgtEfhL+o9JiQvE7GGBTPCK9QSUjoMWgKDthjDrIX+h/k0I7gth6N5gAAAABJRU5ErkJggg==',
+        `data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg">
+            <circle cx="16" cy="16" r="10" stroke="white" stroke-width="4" fill="%23ffffff55"/>
+            <circle cx="16" cy="16" r="10" stroke="%232563eb" stroke-width="2" fill="none"/>
+         </svg>`,
       iconSize: [32, 32],
       iconAnchor: [16, 16],
     }),
@@ -17,12 +20,7 @@ L.ResizeRotateHandle = L.EditHandle.extend({
     const anchorLatLng = overlay.getOppositeCorner(this._corner);
     const newLatLng = this.getLatLng();
 
-    const angle = this.calculateAngleDelta(formerLatLng, newLatLng, anchorLatLng);
     const scale = this._calculateScalingFactor(formerLatLng, newLatLng, anchorLatLng);
-
-    if (angle !== 0) {
-      overlay.rotateBy(angle, 'rad', anchorLatLng);
-    }
 
     let edgeMinWidth = overlay.edgeMinWidth;
     if (!edgeMinWidth) { edgeMinWidth = 50; } /* just in case */
@@ -44,6 +42,6 @@ L.ResizeRotateHandle = L.EditHandle.extend({
   },
 });
 
-L.resizeRotateHandle = (overlay, idx, options) => {
-  return new L.ResizeRotateHandle(overlay, idx, options);
+L.transformResizeHandle = (overlay, idx, options) => {
+  return new L.TransformResizeHandle(overlay, idx, options);
 };

@@ -50,6 +50,7 @@ L.DistortableImageOverlay.addInitHook(function() {
     L.RotateAction,
     L.FreeRotateAction,
     L.ResizeRotateAction,
+    L.TransformAction,
     L.LockAction,
     L.OpacityAction,
     L.OpacitiesAction,
@@ -66,6 +67,7 @@ L.DistortableImageOverlay.addInitHook(function() {
     rotate: L.RotateAction,
     freeRotate: L.FreeRotateAction,
     resizeRotate: L.ResizeRotateAction,
+    transform: L.TransformAction,
     lock: L.LockAction,
   };
 
