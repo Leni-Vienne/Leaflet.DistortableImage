@@ -73,6 +73,8 @@ L.DistortableImageOverlay = L.ImageOverlay.extend({
       }
     });
 
+    // Track mouse movement to distinguish clicks from drags
+    L.DomEvent.on(this.getElement(), 'mousedown', this._onMouseDown, this);
     L.DomEvent.on(this.getElement(), 'click', this._onClick, this);
     L.DomEvent.on(map, {
       singleclickon: this._singleClickListeners,
@@ -146,6 +148,11 @@ L.DistortableImageOverlay = L.ImageOverlay.extend({
     else { return; }
   },
 
+  _onMouseDown(e) {
+    // Track initial mouse position to detect movement
+    this._mouseDownPos = {x: e.clientX, y: e.clientY};
+  },
+
   _singleClickListeners() {
     const map = this._map;
     L.DomEvent.off(map, 'click', this.deselect, this);
@@ -175,6 +182,23 @@ L.DistortableImageOverlay = L.ImageOverlay.extend({
   },
 
   _onClick(e) {
+    // Check if mouse moved significantly (indicates dragging/panning)
+    let wasMouseMovement = false;
+    if (this._mouseDownPos && !this.options.draggable) {
+      const moveDistance = Math.sqrt(
+        Math.pow(e.clientX - this._mouseDownPos.x, 2) + 
+        Math.pow(e.clientY - this._mouseDownPos.y, 2)
+      );
+      wasMouseMovement = moveDistance > 5; // 5px threshold
+    }
+    
+    // If draggable is false and there was mouse movement, ignore the click
+    // (user was panning the map through the overlay)
+    if (!this.options.draggable && wasMouseMovement) {
+      this._wasDragged = false;
+      return;
+    }
+    
     if (this._wasDragged) {
       // This was a drag operation - use original selectOnDrag logic
       if (this.options.selectOnDrag) {
