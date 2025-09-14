@@ -315,11 +315,15 @@ L.DistortableImage.Edit = L.Handler.extend({
 
       // Map dragging mode
       if (edit._shouldDragMap) {
-        const delta = this._newPos.subtract(this._startPoint);
+        if (!this._lastPos) {
+          this._lastPos = this._newPos.clone();
+        }
+        
+        const delta = this._newPos.subtract(this._lastPos);
         map.panBy(delta.multiplyBy(-1), {animate: false});
-
-        // Reset position to prevent image movement
-        this._newPos = this._startPoint.clone();
+        
+        // Update last position for next iteration
+        this._lastPos = this._newPos.clone();
         return;
       }
 
@@ -344,6 +348,10 @@ L.DistortableImage.Edit = L.Handler.extend({
     };
 
     this.dragging.on('dragend', () => {
+      // Reset for next drag
+      if (this.dragging._lastPos) {
+        delete this.dragging._lastPos;
+      }
       overlay.fire('dragend');
     });
   },

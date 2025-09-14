@@ -9,9 +9,9 @@ let map;
     img = L.distortableImageOverlay('example.jpg', {
       selected: true,
       fullResolutionSrc: 'large.jpg',
-      deselectOnOutsideClick: false,
-      dragBehavior: 'auto',     // 'overlay', 'map', or 'auto'
-      selectOnDrag: false,      // Don't select when dragging
+      deselectOnOutsideClick: true,
+      dragBehavior: 'map',     // 'overlay', 'map', or 'auto'
+      selectOnDrag: true,      // Don't select when dragging
     }).addTo(map);
 
   });

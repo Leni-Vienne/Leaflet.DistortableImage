@@ -1,6 +1,5 @@
 L.DistortAction = L.EditAction.extend({
   initialize(map, overlay, options) {
-    console.log('DistortAction');
     options = options || {};
     options.toolbarIcon = {
       svg: true,
