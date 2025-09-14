@@ -12,3 +12,6 @@ dist/*
 !dist/vendor.css
 !dist/leaflet.distortableimage.js.map
 .idea
+
+.mcp.json
+settings.local.json

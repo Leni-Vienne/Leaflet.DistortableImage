@@ -31,7 +31,7 @@ L.OpacityAction = L.EditAction.extend({
     const link = this._link;
 
     L.IconUtil.toggleXlink(link, 'opacity', 'opacity_empty');
-    L.IconUtil.toggleTitle(link, 'Make Image Transparent', 'Make Image Opaque');
+    L.IconUtil.toggleTitle(link, 'Make Imageeeee Transparent', 'Make Image Opaque');
     edit._toggleOpacity();
   },
 });

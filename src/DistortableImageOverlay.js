@@ -10,6 +10,8 @@ L.DistortableImageOverlay = L.ImageOverlay.extend({
     interactive: true,
     tooltipText: '',
     deselectOnOutsideClick: true,
+    dragBehavior: 'overlay', // 'overlay', 'map', or 'auto'
+    selectOnDrag: true, // whether dragging should trigger selection
   },
 
   initialize(url, options) {
@@ -70,7 +72,7 @@ L.DistortableImageOverlay = L.ImageOverlay.extend({
       }
     });
 
-    L.DomEvent.on(this.getElement(), 'click', this.select, this);
+    L.DomEvent.on(this.getElement(), 'click', this._onClick, this);
     L.DomEvent.on(map, {
       singleclickon: this._singleClickListeners,
       singleclickoff: this._resetClickListeners,
@@ -169,6 +171,15 @@ L.DistortableImageOverlay = L.ImageOverlay.extend({
     this._selected = false;
     this.fire('deselect');
     return this;
+  },
+
+  _onClick(e) {
+    // Only select if selectOnDrag is true OR if this wasn't triggered by a drag
+    if (this.options.selectOnDrag || !this._wasDragged) {
+      this.select(e);
+    }
+    // Reset drag flag
+    this._wasDragged = false;
   },
 
   select(e) {

@@ -295,9 +295,15 @@ L.DistortableImage.Edit = L.Handler.extend({
     this.dragging.enable();
 
     /* Hide toolbars and markers while dragging; click will re-show it */
-    this.dragging.on('dragstart', () => {
+    this.dragging.on('dragstart', (e) => {
       overlay.fire('dragstart');
       this._removeToolbar();
+
+      // Mark that a drag occurred
+      overlay._wasDragged = true;
+
+      // Determine drag behavior based on options
+      this._shouldDragMap = this._getDragBehavior();
     });
 
     /*
@@ -305,6 +311,19 @@ L.DistortableImage.Edit = L.Handler.extend({
      * distort transformations that we set when it calls L.DomUtil.setPosition.
      */
     this.dragging._updatePosition = function() {
+      const edit = overlay.editing;
+
+      // Map dragging mode
+      if (edit._shouldDragMap) {
+        const delta = this._startPoint.subtract(this._newPos);
+        map.panBy(delta, {animate: false});
+
+        // Reset position to prevent image movement
+        this._newPos = this._startPoint.clone();
+        return;
+      }
+
+      // Original image dragging behavior
       const topLeft = overlay.getCorner(0);
       const delta = this._newPos.subtract(map.latLngToLayerPoint(topLeft));
       let currentPoint;
@@ -327,6 +346,23 @@ L.DistortableImage.Edit = L.Handler.extend({
     this.dragging.on('dragend', () => {
       overlay.fire('dragend');
     });
+  },
+
+  _getDragBehavior() {
+    const overlay = this._overlay;
+    const dragBehavior = overlay.options.dragBehavior;
+
+    switch (dragBehavior) {
+      case 'map':
+        return true;
+      case 'overlay':
+        return false;
+      case 'auto':
+        // Auto mode: drag map if image is not selected, drag overlay if selected
+        return !overlay.isSelected();
+      default:
+        return false; // Default to overlay dragging
+    }
   },
 
   _disableDragging() {
