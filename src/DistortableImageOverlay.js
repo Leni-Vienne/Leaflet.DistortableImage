@@ -175,13 +175,18 @@ L.DistortableImageOverlay = L.ImageOverlay.extend({
   },
 
   _onClick(e) {
-    // If this was triggered by a drag and selectOnDrag is false, only maintain selection if already selected
-    if (this._wasDragged && !this.options.selectOnDrag) {
-      if (this._selected) {
-        this.select(e); // Restore selection state after drag
+    if (this._wasDragged) {
+      // This was a drag operation - use original selectOnDrag logic
+      if (this.options.selectOnDrag) {
+        this.select(e);
+      } else {
+        // selectOnDrag: false - only restore selection if already selected
+        if (this._selected) {
+          this.select(e); // Restore selection state (toolbar, etc.)
+        }
       }
     } else {
-      // Normal click (not drag) - toggle selection
+      // This was a pure click (no drag) - toggle selection
       if (this._selected) {
         this.deselect();
       } else {
