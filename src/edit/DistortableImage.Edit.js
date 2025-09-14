@@ -315,8 +315,8 @@ L.DistortableImage.Edit = L.Handler.extend({
 
       // Map dragging mode
       if (edit._shouldDragMap) {
-        const delta = this._startPoint.subtract(this._newPos);
-        map.panBy(delta, {animate: false});
+        const delta = this._newPos.subtract(this._startPoint);
+        map.panBy(delta.multiplyBy(-1), {animate: false});
 
         // Reset position to prevent image movement
         this._newPos = this._startPoint.clone();
