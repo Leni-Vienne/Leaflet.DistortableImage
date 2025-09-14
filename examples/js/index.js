@@ -12,7 +12,7 @@ let map;
       deselectOnOutsideClick: true,
       dragBehavior: 'auto',     // 'overlay', 'map', or 'auto' (moves map by default, overlay if selected)
       selectOnDrag: false, // Don't select when dragging
-      draggable: false 
+      draggable: true 
     }).addTo(map);
 
   });

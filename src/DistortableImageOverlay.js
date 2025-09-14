@@ -176,7 +176,8 @@ L.DistortableImageOverlay = L.ImageOverlay.extend({
 
   _onClick(e) {
     // Only select if selectOnDrag is true OR if this wasn't triggered by a drag
-    if (this.options.selectOnDrag || !this._wasDragged) {
+    // BUT if the overlay is already selected and was dragged, we should restore selection state
+    if (this.options.selectOnDrag || !this._wasDragged || this._selected) {
       this.select(e);
     }
     // Reset drag flag
