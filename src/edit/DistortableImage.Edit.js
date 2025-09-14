@@ -39,9 +39,7 @@ L.DistortableImage.Edit = L.Handler.extend({
 
     this.parentGroup = overlay.eP ? overlay.eP : false;
 
-    L.DomEvent.on(overlay.getElement(), {
-      dblclick: this.nextMode,
-    }, this);
+    // Double-click to change mode removed for better UX
 
     L.DomEvent.on(window, 'keydown', this._onKeyDown, this);
   },
@@ -72,9 +70,7 @@ L.DistortableImage.Edit = L.Handler.extend({
       eP.editing._removeToolbar();
     }
 
-    L.DomEvent.off(overlay.getElement(), {
-      dblclick: this.nextMode,
-    }, this);
+    // Double-click event handler removed
 
     L.DomEvent.off(window, 'keydown', this._onKeyDown, this);
   },
