@@ -10,8 +10,9 @@ let map;
       selected: true,
       fullResolutionSrc: 'large.jpg',
       deselectOnOutsideClick: true,
-      dragBehavior: 'map',     // 'overlay', 'map', or 'auto'
-      selectOnDrag: true,      // Don't select when dragging
+      dragBehavior: 'auto',     // 'overlay', 'map', or 'auto' (moves map by default, overlay if selected)
+      selectOnDrag: false, // Don't select when dragging
+      draggable: false 
     }).addTo(map);
 
   });

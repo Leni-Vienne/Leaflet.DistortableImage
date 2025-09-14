@@ -291,6 +291,11 @@ L.DistortableImage.Edit = L.Handler.extend({
     const overlay = this._overlay;
     const map = overlay._map;
 
+    // Don't enable dragging if draggable is false
+    if (!overlay.options.draggable) {
+      return;
+    }
+
     this.dragging = new L.Draggable(overlay.getElement());
     this.dragging.enable();
 

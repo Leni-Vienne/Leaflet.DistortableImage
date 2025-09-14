@@ -12,6 +12,7 @@ L.DistortableImageOverlay = L.ImageOverlay.extend({
     deselectOnOutsideClick: true,
     dragBehavior: 'overlay', // 'overlay', 'map', or 'auto'
     selectOnDrag: true, // whether dragging should trigger selection
+    draggable: true, // whether the overlay can be dragged at all
   },
 
   initialize(url, options) {
