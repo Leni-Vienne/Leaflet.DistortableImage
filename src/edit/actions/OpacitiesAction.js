@@ -104,7 +104,7 @@ L.OpacitiesAction = L.EditAction.extend({
     options.toolbarIcon = {
       svg: true,
       html: 'opacities',
-      tooltip: 'Set custom opacity',
+      tooltip: 'Set custom opacity23322332',
       className: mode === 'lock' ? 'disabled' : '',
     };
 
