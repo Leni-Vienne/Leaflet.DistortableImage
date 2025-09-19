@@ -186,19 +186,18 @@ L.DistortableImageOverlay = L.ImageOverlay.extend({
     let wasMouseMovement = false;
     if (this._mouseDownPos && !this.options.draggable) {
       const moveDistance = Math.sqrt(
-        Math.pow(e.clientX - this._mouseDownPos.x, 2) + 
-        Math.pow(e.clientY - this._mouseDownPos.y, 2)
+          Math.pow(e.clientX - this._mouseDownPos.x, 2) +
+          Math.pow(e.clientY - this._mouseDownPos.y, 2)
       );
       wasMouseMovement = moveDistance > 5; // 5px threshold
     }
-    
+
     // If draggable is false and there was mouse movement, ignore the click
     // (user was panning the map through the overlay)
     if (!this.options.draggable && wasMouseMovement) {
       this._wasDragged = false;
       return;
     }
-    
     if (this._wasDragged) {
       // This was a drag operation - use original selectOnDrag logic
       if (this.options.selectOnDrag) {
@@ -597,6 +596,96 @@ L.DistortableImageOverlay = L.ImageOverlay.extend({
       i === -3 ? this.getCorner(-4) :
       i === -4 ? this.getCorner(-3) :
       null;
+  },
+
+  setOptions(newOptions) {
+    if (!newOptions) return this;
+
+    const oldOptions = L.Util.extend({}, this.options);
+    L.setOptions(this, newOptions);
+
+    // Handle specific property updates that require special logic
+    this._updateProperties(oldOptions, newOptions);
+
+    return this;
+  },
+
+  _updateProperties(oldOptions, newOptions) {
+    // Update instance properties that are cached from options
+    if ('editable' in newOptions) {
+      this.editable = this.options.editable;
+      // Handle editing state changes
+      if (this._map && this.editing) {
+        if (this.options.editable && !this.editing.enabled()) {
+          this.editing.enable();
+        } else if (!this.options.editable && this.editing.enabled()) {
+          this.editing.disable();
+        }
+      }
+    }
+
+    if ('interactive' in newOptions) {
+      this.interactive = this.options.interactive;
+    }
+
+    if ('tooltipText' in newOptions) {
+      this.tooltipText = this.options.tooltipText;
+      // Update tooltip if currently displayed
+      if (this.isTooltipOpen()) {
+        this.closeTooltip();
+        if (this.tooltipText) {
+          this.bindTooltip(this.tooltipText, {direction: 'top'});
+        }
+      }
+    }
+
+    if ('selected' in newOptions) {
+      this._selected = this.options.selected;
+      // Apply selection state if overlay is on map
+      if (this._map) {
+        if (this.options.selected && !this.isSelected()) {
+          this.select();
+        } else if (!this.options.selected && this.isSelected()) {
+          this.deselect();
+        }
+      }
+    }
+
+    if ('mode' in newOptions && this.editing && this.editing.enabled()) {
+      // Update editing mode if it's available
+      if (this.editing.hasMode(this.options.mode)) {
+        this.editing.setMode(this.options.mode);
+      }
+    }
+
+    if ('height' in newOptions && this._map) {
+      // Recalculate dimensions if height changed
+      this._initImageDimensions();
+    }
+
+    if ('edgeMinWidth' in newOptions) {
+      this.edgeMinWidth = this.options.edgeMinWidth;
+    }
+
+    // Handle actions/tools changes
+    if ('actions' in newOptions && this.editing && this.editing.enabled()) {
+      this.editing.setActions(this.options.actions);
+    }
+
+    // Handle drag behavior properties - these affect event handling and editing behavior
+    if ('dragBehavior' in newOptions || 'selectOnDrag' in newOptions || 'draggable' in newOptions) {
+      // If editing is enabled, update the drag behavior
+      if (this.editing && this.editing.enabled()) {
+        // Trigger a refresh of the editing handlers to apply new drag behavior
+        this.editing._refreshHandlers();
+      }
+    }
+
+    // Fire an event to notify that options have changed
+    this.fire('optionschanged', {
+      oldOptions: oldOptions,
+      newOptions: newOptions,
+    });
   },
 
   // image (vertex) centroid calculation

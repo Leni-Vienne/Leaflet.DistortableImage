@@ -16,6 +16,36 @@ let map;
     }).addTo(map);
 
   });
+
+  // Define different action sets
+      const basicTools = [
+        L.DragAction,
+        L.ScaleAction, 
+        L.RotateAction,
+        L.DeleteAction
+      ];
+
+      const advancedTools = [
+        L.DragAction,
+        L.ScaleAction,
+        L.DistortAction,
+        L.RotateAction,
+        L.FreeRotateAction,
+        L.LockAction,
+        L.OpacityAction,
+        L.BorderAction,
+        L.ExportAction,
+        L.DeleteAction
+      ];
+
+
+  /*setTimeout(() => {
+    img.setOptions({ draggable: false, actions: basicTools });
+  }, 5000);
+
+    setTimeout(() => {
+    img.setOptions({  actions: advancedTools });
+  }, 5000);*/
 })();
 
 L.Control.geocoder().addTo(map);

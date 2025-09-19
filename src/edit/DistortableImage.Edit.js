@@ -319,10 +319,10 @@ L.DistortableImage.Edit = L.Handler.extend({
         if (!this._lastPos) {
           this._lastPos = this._newPos.clone();
         }
-        
+
         const delta = this._newPos.subtract(this._lastPos);
         map.panBy(delta.multiplyBy(-1), {animate: false});
-        
+
         // Update last position for next iteration
         this._lastPos = this._newPos.clone();
         return;
@@ -379,6 +379,46 @@ L.DistortableImage.Edit = L.Handler.extend({
       this.dragging.disable();
       delete this.dragging;
     }
+  },
+
+  _refreshHandlers() {
+    // Refresh dragging behavior when drag-related options change
+    this._disableDragging();
+    if (!this.isMode('lock')) {
+      this._enableDragging();
+    }
+  },
+
+  setActions(newActions) {
+    if (!newActions || !Array.isArray(newActions)) {
+      return this;
+    }
+
+    // Update the actions array
+    this.editActions = newActions;
+
+    // Reinitialize modes based on new actions
+    this._initModes();
+
+    // If there's a toolbar, update it
+    if (this.toolbar) {
+      this._removeToolbar();
+      if (this._overlay.isSelected()) {
+        this._addToolbar();
+      }
+    }
+
+    // Update the current mode if it's no longer available
+    if (!this._modes[this._mode] && Object.keys(this._modes).length > 0) {
+      this._mode = Object.keys(this._modes)[0];
+    } else if (Object.keys(this._modes).length === 0) {
+      this._mode = '';
+    }
+
+    // Update handles for the new mode
+    this._updateHandle();
+
+    return this;
   },
 
   _dragMode() {
