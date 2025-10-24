@@ -203,36 +203,52 @@ L.DistortableImage.Edit = L.Handler.extend({
     if (next.baseClass !== 'leaflet-toolbar-icon' || this.hasTool(next)) {
       return this;
     }
-    this.editActions.some((item, idx) => {
-      if (item === old) {
-        this._removeToolbar();
-        this.editActions[idx] = next;
-        this._addToolbar();
-        for (const mode in L.DistortableImage.Edit.MODES) {
-          if (L.DistortableImage.Edit.MODES[mode] === old) {
-            delete this._modes[mode];
-            this._nextOrNone(mode);
-          } else if (L.DistortableImage.Edit.MODES[mode] === next) {
-            this._modes[mode] = next;
+
+    // Set rebuild flag during tool replacement
+    this._rebuildingToolbar = true;
+
+    try {
+      this.editActions.some((item, idx) => {
+        if (item === old) {
+          this._removeToolbar();
+          this.editActions[idx] = next;
+          this._addToolbar();
+          for (const mode in L.DistortableImage.Edit.MODES) {
+            if (L.DistortableImage.Edit.MODES[mode] === old) {
+              delete this._modes[mode];
+              this._nextOrNone(mode);
+            } else if (L.DistortableImage.Edit.MODES[mode] === next) {
+              this._modes[mode] = next;
+            }
           }
+          return true;
         }
-        return true;
-      }
-    });
+      });
+    } finally {
+      this._rebuildingToolbar = false;
+    }
+
     return this;
   },
 
   addTool(value) {
     if (value.baseClass === 'leaflet-toolbar-icon' && !this.hasTool(value)) {
-      this._removeToolbar();
-      this.editActions.push(value);
-      this._addToolbar();
-      for (const mode in L.DistortableImage.Edit.MODES) {
-        if (L.DistortableImage.Edit.MODES[mode] === value) {
-          this._modes[mode] = value;
+      // Set rebuild flag during tool addition
+      this._rebuildingToolbar = true;
+
+      try {
+        this._removeToolbar();
+        this.editActions.push(value);
+        this._addToolbar();
+        for (const mode in L.DistortableImage.Edit.MODES) {
+          if (L.DistortableImage.Edit.MODES[mode] === value) {
+            this._modes[mode] = value;
+          }
         }
+        if (!this._overlay.isSelected()) { this._removeToolbar(); }
+      } finally {
+        this._rebuildingToolbar = false;
       }
-      if (!this._overlay.isSelected()) { this._removeToolbar(); }
     }
     return this;
   },
@@ -242,21 +258,29 @@ L.DistortableImage.Edit = L.Handler.extend({
   },
 
   removeTool(value) {
-    this.editActions.some((item, idx) => {
-      if (item === value) {
-        this._removeToolbar();
-        this.editActions.splice(idx, 1);
-        this._addToolbar();
-        for (const mode in L.DistortableImage.Edit.MODES) {
-          if (L.DistortableImage.Edit.MODES[mode] === value) {
-            delete this._modes[mode];
-            this._nextOrNone(mode);
+    // Set rebuild flag during tool removal
+    this._rebuildingToolbar = true;
+
+    try {
+      this.editActions.some((item, idx) => {
+        if (item === value) {
+          this._removeToolbar();
+          this.editActions.splice(idx, 1);
+          this._addToolbar();
+          for (const mode in L.DistortableImage.Edit.MODES) {
+            if (L.DistortableImage.Edit.MODES[mode] === value) {
+              delete this._modes[mode];
+              this._nextOrNone(mode);
+            }
           }
+          return true;
         }
-        return true;
-      }
-    });
-    if (!this._overlay.isSelected()) { this._removeToolbar(); }
+      });
+      if (!this._overlay.isSelected()) { this._removeToolbar(); }
+    } finally {
+      this._rebuildingToolbar = false;
+    }
+
     return this;
   },
 
@@ -394,29 +418,53 @@ L.DistortableImage.Edit = L.Handler.extend({
       return this;
     }
 
-    // Update the actions array
-    this.editActions = newActions;
+    const overlay = this._overlay;
+    const map = overlay._map;
 
-    // Reinitialize modes based on new actions
-    this._initModes();
+    // Set rebuild flag to prevent event firing during rebuild
+    this._rebuildingToolbar = true;
 
-    // If there's a toolbar, update it
-    if (this.toolbar) {
-      this._removeToolbar();
-      if (this._overlay.isSelected()) {
+    try {
+      // Store current state
+      const wasSelected = overlay.isSelected();
+      const oldMode = this._mode;
+
+      // Step 1: Clean up current handles BEFORE changing anything
+      // This ensures corner handles and other mode-specific UI is removed
+      if (this.currentHandle && map) {
+        map.removeLayer(this.currentHandle);
+        this.currentHandle = null;
+      }
+
+      // Step 2: Remove toolbar if it exists
+      if (this.toolbar) {
+        this._removeToolbar();
+      }
+
+      // Step 3: Update the actions array and reinitialize modes
+      this.editActions = newActions;
+      this._initModes();
+
+      // Step 4: Determine new mode - if old mode is no longer available, pick a new one
+      if (!this._modes[oldMode]) {
+        if (Object.keys(this._modes).length > 0) {
+          this._mode = Object.keys(this._modes)[0];
+        } else {
+          this._mode = '';
+        }
+      }
+
+      // Step 5: Update handles for the new mode
+      this._updateHandle();
+
+      // Step 6: Restore toolbar if overlay is still selected
+      if (wasSelected && !overlay.options.suppressToolbar) {
         this._addToolbar();
       }
+    } finally {
+      // Always clear the rebuild flag, even if there's an error
+      this._rebuildingToolbar = false;
     }
-
-    // Update the current mode if it's no longer available
-    if (!this._modes[this._mode] && Object.keys(this._modes).length > 0) {
-      this._mode = Object.keys(this._modes)[0];
-    } else if (Object.keys(this._modes).length === 0) {
-      this._mode = '';
-    }
-
-    // Update handles for the new mode
-    this._updateHandle();
 
     return this;
   },
@@ -712,8 +760,15 @@ L.DistortableImage.Edit = L.Handler.extend({
   },
 
   _refresh() {
-    if (this.toolbar) { this._removeToolbar(); }
-    this._addToolbar();
+    // Set rebuild flag during toolbar refresh
+    this._rebuildingToolbar = true;
+
+    try {
+      if (this.toolbar) { this._removeToolbar(); }
+      this._addToolbar();
+    } finally {
+      this._rebuildingToolbar = false;
+    }
   },
 
   _updateToolbarPos() {

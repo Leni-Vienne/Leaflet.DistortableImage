@@ -31,7 +31,9 @@ L.DistortableImageOverlay = L.ImageOverlay.extend({
 
   onAdd(map) {
     this._map = map;
-    if (!this.getElement()) { this._initImage(); }
+    if (!this.getElement()) {
+      this._initImage();
+    }
 
     map.on('viewreset', this._reset, this);
 
@@ -66,9 +68,13 @@ L.DistortableImageOverlay = L.ImageOverlay.extend({
       const eventParents = this._eventParents;
       if (eventParents) {
         this.eP = eventParents[Object.keys(eventParents)[0]];
-        if (this.eP.editable) { this.editing.enable(); }
+        if (this.eP.editable) {
+          this.editing.enable();
+        }
       } else {
-        if (this.editable) { this.editing.enable(); }
+        if (this.editable) {
+          this.editing.enable();
+        }
         this.eP = null;
       }
     });
@@ -76,11 +82,15 @@ L.DistortableImageOverlay = L.ImageOverlay.extend({
     // Track mouse movement to distinguish clicks from drags
     L.DomEvent.on(this.getElement(), 'mousedown', this._onMouseDown, this);
     L.DomEvent.on(this.getElement(), 'click', this._onClick, this);
-    L.DomEvent.on(map, {
-      singleclickon: this._singleClickListeners,
-      singleclickoff: this._resetClickListeners,
-      singleclick: this._singleClick,
-    }, this);
+    L.DomEvent.on(
+        map,
+        {
+          singleclickon: this._singleClickListeners,
+          singleclickoff: this._resetClickListeners,
+          singleclick: this._singleClick,
+        },
+        this,
+    );
 
     /**
      * custom events fired from DoubleClickLabels.js. Used to differentiate
@@ -98,20 +108,31 @@ L.DistortableImageOverlay = L.ImageOverlay.extend({
 
   onRemove(map) {
     L.DomEvent.off(this.getElement(), 'click', this.select, this);
-    L.DomEvent.off(map, {
-      singleclickon: this._singleClickListeners,
-      singleclickoff: this._resetClickListeners,
-      singleclick: this._singleClick,
-    }, this);
+    L.DomEvent.off(
+        map,
+        {
+          singleclickon: this._singleClickListeners,
+          singleclickoff: this._resetClickListeners,
+          singleclick: this._singleClick,
+        },
+        this,
+    );
     L.DomEvent.off(map, 'click', this.deselect, this);
 
-    if (this.editing) { this.editing.disable(); }
+    if (this.editing) {
+      this.editing.disable();
+    }
     this.fire('remove');
 
     L.ImageOverlay.prototype.onRemove.call(this, map);
 
     L.DomEvent.on(this.getElement(), 'mouseout', this.closeTooltip, this);
-    L.DomEvent.off(this.getElement(), 'mousemove', this.deactivateTooltip, this);
+    L.DomEvent.off(
+        this.getElement(),
+        'mousemove',
+        this.deactivateTooltip,
+        this,
+    );
   },
 
   _initImageDimensions() {
@@ -119,7 +140,7 @@ L.DistortableImageOverlay = L.ImageOverlay.extend({
     const originalImageWidth = L.DomUtil.getStyle(this.getElement(), 'width');
     const originalImageHeight = L.DomUtil.getStyle(this.getElement(), 'height');
     const aspectRatio =
-        parseInt(originalImageWidth) / parseInt(originalImageHeight);
+      parseInt(originalImageWidth) / parseInt(originalImageHeight);
     const imageHeight = this.options.height;
     const imageWidth = parseInt(aspectRatio * imageHeight);
     const center = map.project(map.getCenter());
@@ -136,16 +157,19 @@ L.DistortableImageOverlay = L.ImageOverlay.extend({
     }
 
     this._initialDimensions = {
-      'center': center,
-      'offset': offset,
-      'zoom': map.getZoom(),
+      center: center,
+      offset: offset,
+      zoom: map.getZoom(),
     };
     this.setBounds(L.latLngBounds(this.getCorners()));
   },
 
   _singleClick(e) {
-    if (e.type === 'singleclick' && this.options.deselectOnOutsideClick) { this.deselect(); }
-    else { return; }
+    if (e.type === 'singleclick' && this.options.deselectOnOutsideClick) {
+      this.deselect();
+    } else {
+      return;
+    }
   },
 
   _onMouseDown(e) {
@@ -171,13 +195,28 @@ L.DistortableImageOverlay = L.ImageOverlay.extend({
 
   deselect() {
     const edit = this.editing;
-    if (!edit.enabled()) { return; }
+    if (!edit.enabled()) {
+      return;
+    }
 
-    edit._removeToolbar();
-    edit._hideMarkers();
+    // Set rebuild flag during deselection to prevent event firing issues
+    if (edit) {
+      edit._rebuildingToolbar = true;
+    }
 
-    this._selected = false;
-    this.fire('deselect');
+    try {
+      edit._removeToolbar();
+      edit._hideMarkers();
+
+      this._selected = false;
+      this.fire('deselect');
+    } finally {
+      // Clear rebuild flag
+      if (edit) {
+        edit._rebuildingToolbar = false;
+      }
+    }
+
     return this;
   },
 
@@ -187,7 +226,7 @@ L.DistortableImageOverlay = L.ImageOverlay.extend({
     if (this._mouseDownPos && !this.options.draggable) {
       const moveDistance = Math.sqrt(
           Math.pow(e.clientX - this._mouseDownPos.x, 2) +
-          Math.pow(e.clientY - this._mouseDownPos.y, 2)
+          Math.pow(e.clientY - this._mouseDownPos.y, 2),
       );
       wasMouseMovement = moveDistance > 5; // 5px threshold
     }
@@ -224,8 +263,12 @@ L.DistortableImageOverlay = L.ImageOverlay.extend({
     const edit = this.editing;
     const eP = this.eP;
 
-    if (!edit.enabled()) { return; }
-    if (e) { L.DomEvent.stopPropagation(e); }
+    if (!edit.enabled()) {
+      return;
+    }
+    if (e) {
+      L.DomEvent.stopPropagation(e);
+    }
 
     // this ensures deselection of all other images, allowing us to keep collection group optional
     this._programmaticGrouping();
@@ -282,7 +325,7 @@ L.DistortableImageOverlay = L.ImageOverlay.extend({
         exceedsTop = map.project(corner).y / zoom < 2;
         exceedsBottom = map.project(corner).y / Math.pow(2, zoom) >= 255;
       }
-      return (exceedsTop || exceedsBottom);
+      return exceedsTop || exceedsBottom;
     }
   },
 
@@ -378,7 +421,9 @@ L.DistortableImageOverlay = L.ImageOverlay.extend({
     let p;
     const scaledCorners = {};
 
-    if (scale === 0) { return; }
+    if (scale === 0) {
+      return;
+    }
 
     for (i = 0; i < 4; i++) {
       p = map
@@ -395,8 +440,8 @@ L.DistortableImageOverlay = L.ImageOverlay.extend({
   },
 
   getAngle(unit = 'deg') {
-    const matrix = this.getElement().style[L.DomUtil.TRANSFORM]
-        .split('matrix3d')[1]
+    const matrix = this.getElement()
+        .style[L.DomUtil.TRANSFORM].split('matrix3d')[1]
         .slice(1, -1)
         .split(',');
 
@@ -418,8 +463,8 @@ L.DistortableImageOverlay = L.ImageOverlay.extend({
     }
 
     return unit === 'deg' ?
-        Math.round(L.TrigUtil.radiansToDegrees(angle)) :
-        L.Util.formatNum(angle, 2);
+      Math.round(L.TrigUtil.radiansToDegrees(angle)) :
+      L.Util.formatNum(angle, 2);
   },
 
   setAngle(angle, unit = 'deg') {
@@ -446,7 +491,7 @@ L.DistortableImageOverlay = L.ImageOverlay.extend({
       p = map.project(this.getCorner(i)).subtract(center);
       q = L.point(
           Math.cos(angle) * p.x - Math.sin(angle) * p.y,
-          Math.sin(angle) * p.x + Math.cos(angle) * p.y
+          Math.sin(angle) * p.x + Math.cos(angle) * p.y,
       );
       corners[i] = map.unproject(q.add(center));
     }
@@ -515,8 +560,8 @@ L.DistortableImageOverlay = L.ImageOverlay.extend({
     const map = this._map;
     const image = this.getElement();
     const latLngToLayerPoint = L.bind(map.latLngToLayerPoint, map);
-    const transformMatrix = this
-        ._calculateProjectiveTransform(latLngToLayerPoint);
+    const transformMatrix =
+      this._calculateProjectiveTransform(latLngToLayerPoint);
     const topLeft = latLngToLayerPoint(this.getCorner(0));
     const warp = L.DomUtil.getMatrixString(transformMatrix);
     const translation = this._getTranslateString(topLeft);
@@ -548,7 +593,7 @@ L.DistortableImageOverlay = L.ImageOverlay.extend({
       return map._latLngToNewLayerPoint(latlng, event.zoom, event.center);
     };
     const transformMatrix = this._calculateProjectiveTransform(
-        latLngToNewLayerPoint
+        latLngToNewLayerPoint,
     );
     const topLeft = latLngToNewLayerPoint(this.getCorner(0));
     const warp = L.DomUtil.getMatrixString(transformMatrix);
@@ -573,13 +618,18 @@ L.DistortableImageOverlay = L.ImageOverlay.extend({
       const pointB = map.project(this._corners[3]).subtract(pointA);
       const half = Math.sqrt(Math.pow(pointB.x, 2) + Math.pow(pointB.y, 2)) / 2;
       const deviation = 32;
-      const angle = Math.atan(deviation / half) + Math.atan2(pointB.y, pointB.x);
+      const angle =
+        Math.atan(deviation / half) + Math.atan2(pointB.y, pointB.x);
       const length = Math.sqrt(Math.pow(half, 2) + Math.pow(deviation, 2));
-      const point = L.point(Math.cos(angle) * length, Math.sin(angle) * length).add(pointA);
+      const point = L.point(
+          Math.cos(angle) * length,
+          Math.sin(angle) * length,
+      ).add(pointA);
       return map.unproject(point);
     } else {
       const aCorner = Math.abs(i) % 4;
-      const bCorner = aCorner === 1 ? 0 : aCorner === 2 ? 3 : aCorner === 3 ? 1 : 2;
+      const bCorner =
+        aCorner === 1 ? 0 : aCorner === 2 ? 3 : aCorner === 3 ? 1 : 2;
       const lat = (this._corners[aCorner].lat + this._corners[bCorner].lat) / 2;
       const lng = (this._corners[aCorner].lng + this._corners[bCorner].lng) / 2;
       return L.latLng(lat, lng);
@@ -587,15 +637,23 @@ L.DistortableImageOverlay = L.ImageOverlay.extend({
   },
 
   getOppositeCorner(i) {
-    return i === 0 ? this.getCorner(3) :
-      i === 1 ? this.getCorner(2) :
-      i === 2 ? this.getCorner(1) :
-      i === 3 ? this.getCorner(0) :
-      i === -1 ? this.getCorner(-2) :
-      i === -2 ? this.getCorner(-1) :
-      i === -3 ? this.getCorner(-4) :
-      i === -4 ? this.getCorner(-3) :
-      null;
+    return i === 0 ?
+      this.getCorner(3) :
+      i === 1 ?
+        this.getCorner(2) :
+        i === 2 ?
+          this.getCorner(1) :
+          i === 3 ?
+            this.getCorner(0) :
+            i === -1 ?
+              this.getCorner(-2) :
+              i === -2 ?
+                this.getCorner(-1) :
+                i === -3 ?
+                  this.getCorner(-4) :
+                  i === -4 ?
+                    this.getCorner(-3) :
+                    null;
   },
 
   setOptions(newOptions) {
@@ -669,11 +727,26 @@ L.DistortableImageOverlay = L.ImageOverlay.extend({
 
     // Handle actions/tools changes
     if ('actions' in newOptions && this.editing && this.editing.enabled()) {
-      this.editing.setActions(this.options.actions);
+      // Set rebuild flag to prevent event firing during toolbar rebuild
+      if (this.editing) {
+        this.editing._rebuildingToolbar = true;
+      }
+      try {
+        this.editing.setActions(this.options.actions);
+      } finally {
+        // Clear rebuild flag
+        if (this.editing) {
+          this.editing._rebuildingToolbar = false;
+        }
+      }
     }
 
     // Handle drag behavior properties - these affect event handling and editing behavior
-    if ('dragBehavior' in newOptions || 'selectOnDrag' in newOptions || 'draggable' in newOptions) {
+    if (
+      'dragBehavior' in newOptions ||
+      'selectOnDrag' in newOptions ||
+      'draggable' in newOptions
+    ) {
       // If editing is enabled, update the drag behavior
       if (this.editing && this.editing.enabled()) {
         // Trigger a refresh of the editing handlers to apply new drag behavior
@@ -682,18 +755,46 @@ L.DistortableImageOverlay = L.ImageOverlay.extend({
     }
 
     // Fire an event to notify that options have changed
+    // This is safe because fire() now has null checks
     this.fire('optionschanged', {
       oldOptions: oldOptions,
       newOptions: newOptions,
     });
   },
 
+  /**
+   * Override fire() method to add null safety checks.
+   * Prevents errors when events are fired during state transitions (e.g., toolbar rebuilds)
+   * where this._map might be null or in an invalid state.
+   */
+  fire(type, data, propagate) {
+    // Add null safety check - don't fire events if map is null or transitional
+    if (!this._map || (this.editing && this.editing._rebuildingToolbar)) {
+      return this;
+    }
+
+    // Call parent fire method with null safety
+    try {
+      return L.ImageOverlay.prototype.fire.call(this, type, data, propagate);
+    } catch (error) {
+      // Silently handle errors during event firing to prevent crashes
+      // during state transitions
+      if (console && console.warn) {
+        console.warn('Event firing failed during state transition:', error);
+      }
+      return this;
+    }
+  },
+
   // image (vertex) centroid calculation
   getCenter() {
     const map = this._map;
-    const reduce = this.getCorners().reduce(function(agg, corner) {
-      return agg.add(map.project(corner));
-    }, L.point(0, 0));
+    const reduce = this.getCorners().reduce(
+        function(agg, corner) {
+          return agg.add(map.project(corner));
+        },
+        L.point(0, 0),
+    );
     return map.unproject(reduce.divideBy(4));
   },
 
@@ -723,10 +824,22 @@ L.DistortableImageOverlay = L.ImageOverlay.extend({
      * maps to the first latlng in this._corners.
      */
     return L.MatrixUtil.general2DProjection(
-        0, 0, c[0].x, c[0].y,
-        w, 0, c[1].x, c[1].y,
-        0, h, c[2].x, c[2].y,
-        w, h, c[3].x, c[3].y
+        0,
+        0,
+        c[0].x,
+        c[0].y,
+        w,
+        0,
+        c[1].x,
+        c[1].y,
+        0,
+        h,
+        c[2].x,
+        c[2].y,
+        w,
+        h,
+        c[3].x,
+        c[3].y,
     );
   },
 });
