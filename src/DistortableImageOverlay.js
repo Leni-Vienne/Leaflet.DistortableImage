@@ -5,7 +5,7 @@ L.DistortableImageOverlay = L.ImageOverlay.extend({
     // todo: find ideal number to prevent distortions during RotateScale, and make it dynamic (remove hardcoding)
     edgeMinWidth: 50,
     editable: true,
-    mode: 'distort',
+    mode: 'resizeRotate', // Initial editing mode: 'drag', 'scale', 'distort', 'rotate', 'freeRotate', 'resizeRotate', 'transform', 'lock' (defaults to first available if not set)
     selected: false,
     interactive: true,
     tooltipText: '',

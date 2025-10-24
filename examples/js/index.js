@@ -12,7 +12,8 @@ let map;
       deselectOnOutsideClick: true,
       dragBehavior: 'auto',     // 'overlay', 'map', or 'auto' (moves map by default, overlay if selected)
       selectOnDrag: false, // Don't select when dragging
-      draggable: true // in addition to 'editable: true', allows to access toolbar but not drag
+      draggable: true, // in addition to 'editable: true', allows to access toolbar but can or cannot drag
+      defaultMode: 'resizeRotate'// 'drag', 'scale', 'distort', 'rotate', 'freeRotate', 'resizeRotate', 'transform', 'lock', more...?
     }).addTo(map);
 
   });

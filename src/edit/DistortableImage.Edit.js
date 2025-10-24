@@ -446,16 +446,25 @@ L.DistortableImage.Edit = L.Handler.extend({
       this._initModes();
 
       // Step 4: Determine new mode - if old mode is no longer available, pick a new one
-      if (!this._modes[oldMode]) {
-        if (Object.keys(this._modes).length > 0) {
-          this._mode = Object.keys(this._modes)[0];
-        } else {
-          this._mode = '';
+      // IMPORTANT: Only set a mode if the overlay is selected
+      if (wasSelected) {
+        if (!this._modes[oldMode]) {
+          if (Object.keys(this._modes).length > 0) {
+            this._mode = Object.keys(this._modes)[0];
+          } else {
+            this._mode = '';
+          }
         }
+      } else {
+        // For unselected overlays, clear the mode completely
+        this._mode = '';
       }
 
       // Step 5: Update handles for the new mode
-      this._updateHandle();
+      // Only add handles to the map if the overlay is selected
+      if (wasSelected) {
+        this._updateHandle();
+      }
 
       // Step 6: Restore toolbar if overlay is still selected
       if (wasSelected && !overlay.options.suppressToolbar) {
