@@ -31,8 +31,11 @@ L.DistortableImageOverlay = L.ImageOverlay.extend({
 
   onAdd(map) {
     this._map = map;
+    console.log('[Debug] onAdd started. Element exists?', !!this.getElement());
+
     if (!this.getElement()) {
       this._initImage();
+      console.log('[Debug] _initImage called (src set).');
     }
 
     map.on('viewreset', this._reset, this);
@@ -44,8 +47,13 @@ L.DistortableImageOverlay = L.ImageOverlay.extend({
       }
     }
 
-    // Have to wait for the image to load because need to access its w/h
-    L.DomEvent.on(this.getElement(), 'load', () => {
+    const element = this.getElement();
+    console.log('[Debug] Attaching load listener. Image complete?', element.complete, 'NaturalWidth:', element.naturalWidth);
+
+    // AI : Fix for cached images race condition
+    // Separate initialization logic to handle both 'load' event and immediate execution for cached images
+    const onImageLoad = () => {
+      console.log('[Debug] Load handler executing (via listener or immediate check)');
       this.getPane().appendChild(this.getElement());
       this._initImageDimensions();
 
@@ -77,7 +85,16 @@ L.DistortableImageOverlay = L.ImageOverlay.extend({
         }
         this.eP = null;
       }
-    });
+    };
+
+    // Have to wait for the image to load because need to access its w/h
+    L.DomEvent.on(this.getElement(), 'load', onImageLoad);
+
+    // AI : Check if image is already loaded (from cache)
+    if (this.getElement().complete) {
+      console.log('[Debug] Image already complete. Triggering onImageLoad immediately.');
+      onImageLoad();
+    }
 
     // Track mouse movement to distinguish clicks from drags
     L.DomEvent.on(this.getElement(), 'mousedown', this._onMouseDown, this);
