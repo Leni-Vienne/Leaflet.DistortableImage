@@ -54,8 +54,14 @@ L.DistortableImage.Edit = L.Handler.extend({
 
     if (this.toolbar) { this._removeToolbar(); }
 
-    for (const handle in this._handles) {
-      L.DomUtil.remove(handle);
+    const map = overlay._map;
+
+    // Fix ghost markers by properly removing handle layers from map (instead of DOM)
+    for (const handleKey in this._handles) {
+      const handleLayer = this._handles[handleKey];
+      if (handleLayer && map) {
+        map.removeLayer(handleLayer);
+      }
     }
 
     /**
